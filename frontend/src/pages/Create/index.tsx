@@ -1,5 +1,5 @@
-import React, { useEffect, useState, ChangeEvent } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import { Link, useHistory } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 
 import api from "../../services/api";
@@ -45,6 +45,16 @@ const Create = () => {
     0,
     0,
   ]);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    whatsapp: "",
+  });
+
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
+  const history = useHistory();
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition((position) => {
@@ -104,6 +114,52 @@ const Create = () => {
     setSelectedPosition([event.latlng.lat, event.latlng.lng]);
   }
 
+  function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.target;
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  }
+
+  function handleSelectItem(id: number) {
+    const alreadySelected = selectedItems.findIndex((item) => item === id);
+
+    if (alreadySelected >= 0) {
+      const filteredItems = selectedItems.filter((item) => item !== id);
+
+      setSelectedItems(filteredItems);
+    } else {
+      setSelectedItems([...selectedItems, id]);
+    }
+  }
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    const { name, email, whatsapp } = formData;
+    const uf = selectedUf;
+    const city = selectedCity;
+    const [latitude, longitude] = selectedPosition;
+    const items = selectedItems;
+    const data = {
+      name,
+      email,
+      whatsapp,
+      uf,
+      city,
+      latitude,
+      longitude,
+      items,
+    };
+
+    await api.post("points", data);
+
+    alert("Point registed!");
+
+    history.push("/");
+  }
+
   return (
     <div id="page-create-point">
       <header>
@@ -114,7 +170,7 @@ const Create = () => {
         </Link>
       </header>
 
-      <form>
+      <form onSubmit={handleSubmit}>
         <h1>Register collection point</h1>
 
         <fieldset>
@@ -124,18 +180,33 @@ const Create = () => {
 
           <div className="field">
             <label htmlFor="name">Entity Name</label>
-            <input type="text" name="name" id="name" />
+            <input
+              onChange={handleInputChange}
+              type="text"
+              name="name"
+              id="name"
+            />
           </div>
 
           <div className="field-group">
             <div className="field">
               <label htmlFor="email">E-mail</label>
-              <input type="email" name="email" id="email" />
+              <input
+                onChange={handleInputChange}
+                type="email"
+                name="email"
+                id="email"
+              />
             </div>
 
             <div className="field">
               <label htmlFor="whatsapp">Whatsapp</label>
-              <input type="text" name="whatsapp" id="whatsapp" />
+              <input
+                onChange={handleInputChange}
+                type="text"
+                name="whatsapp"
+                id="whatsapp"
+              />
             </div>
           </div>
         </fieldset>
@@ -197,7 +268,13 @@ const Create = () => {
           </legend>
           <ul className="items-grid">
             {items.map((item) => (
-              <li key={item.id}>
+              <li
+                key={item.id}
+                onClick={() => {
+                  handleSelectItem(item.id);
+                }}
+                className={selectedItems.includes(item.id) ? "selected" : ""}
+              >
                 <img src={item.image_ulr} alt={item.title} />
                 <span>{item.title}</span>
               </li>
