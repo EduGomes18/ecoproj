@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { RectButton } from "react-native-gesture-handler";
 import RNPickerSelect from "react-native-picker-select";
+import { SvgUri } from "react-native-svg";
+import Logo from "../../assets/logo.svg";
 import { Feather as Icon } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -96,7 +98,7 @@ const Home = () => {
         style={styles.container}
       >
         <View style={styles.main}>
-          <Image source={require("../../assets/logo.png")} />
+          <Logo width={100} height={42} />
           <View>
             <Text style={styles.title}>Your waste collection marketplace!</Text>
             <Text style={styles.description}>
