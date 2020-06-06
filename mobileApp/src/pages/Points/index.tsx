@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Feather as Icon } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import MapView, { Marker } from "react-native-maps";
@@ -30,7 +30,16 @@ interface Points {
   longitude: number;
 }
 
+interface Params {
+  city: string;
+  uf: string;
+}
+
 const Points = () => {
+  const route = useRoute();
+
+  const routeParams = route.params as Params;
+
   const [items, setItems] = useState<Item[]>([]);
 
   const [points, setPoints] = useState<Points[]>([]);
@@ -88,21 +97,19 @@ const Points = () => {
     });
   }, []);
 
-  console.log(points);
-
   useEffect(() => {
     api
       .get("points", {
         params: {
-          city: "Bujari",
-          uf: "AC",
-          items: [1, 2],
+          city: routeParams.city,
+          uf: routeParams.uf,
+          items: selectedItems,
         },
       })
       .then((res) => {
         setPoints(res.data);
       });
-  }, []);
+  }, [selectedItems]);
 
   return (
     <>

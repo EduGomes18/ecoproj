@@ -7,10 +7,13 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  Linking,
 } from "react-native";
 import { Feather as Icon, FontAwesome } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import api from "../../services/api";
+
+import * as MailComposer from "expo-mail-composer";
 
 import Constants from "expo-constants";
 
@@ -42,6 +45,19 @@ const Detail = () => {
 
   function handleNavigateBack() {
     goBack();
+  }
+
+  function handleMail() {
+    MailComposer.composeAsync({
+      subject: "Collect residous",
+      recipients: [data.point.email],
+    });
+  }
+
+  function handleWhatsapp() {
+    Linking.openURL(
+      `whatsapp://send?phone=${data.point.whatsapp}&text=I'm interested about the residues collection`
+    );
   }
 
   useEffect(() => {
@@ -80,11 +96,11 @@ const Detail = () => {
         </View>
       </View>
       <View style={styles.footer}>
-        <RectButton style={styles.button}>
+        <RectButton onPress={handleWhatsapp} style={styles.button}>
           <FontAwesome name="whatsapp" size={20} color="#fff" />
           <Text style={styles.buttonText}>Whatsapp</Text>
         </RectButton>
-        <RectButton style={styles.button}>
+        <RectButton onPress={handleMail} style={styles.button}>
           <Icon name="mail" size={20} color="#fff" />
           <Text style={styles.buttonText}>E-mail</Text>
         </RectButton>

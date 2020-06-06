@@ -1,7 +1,9 @@
 #page-home {
   height: 100vh;
-
-  background: url("../../assets/home-background.svg") no-repeat 670px bottom;
+  background: #dff9fb;
+  background-image: url("../../assets/home-background.svg");
+  background-position: 670px bottom;
+  background-repeat: no-repeat;
 }
 
 #page-home .content {
@@ -23,7 +25,6 @@
 #page-home .content main {
   flex: 1;
   max-width: 560px;
-
   display: flex;
   flex-direction: column;
   justify-content: center;

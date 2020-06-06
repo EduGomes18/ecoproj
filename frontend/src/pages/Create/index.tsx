@@ -1,4 +1,5 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import { toast } from "react-toastify";
 import { Link, useHistory } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 
@@ -155,7 +156,7 @@ const Create = () => {
 
     await api.post("points", data);
 
-    alert("Point registed!");
+    toast.success("New Collection Point registered!");
 
     history.push("/");
   }

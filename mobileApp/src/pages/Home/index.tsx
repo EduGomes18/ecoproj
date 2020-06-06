@@ -1,39 +1,132 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { RectButton } from "react-native-gesture-handler";
+import RNPickerSelect from "react-native-picker-select";
 import { Feather as Icon } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { StyleSheet, ImageBackground, Image, View, Text } from "react-native";
+import {
+  StyleSheet,
+  ImageBackground,
+  Image,
+  View,
+  Text,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import axios from "axios";
 
 const Home = () => {
   const { navigate } = useNavigation();
 
   function handleNavigate() {
-    navigate("Points");
+    navigate("Points", { uf: selectedUf, city: selectedCity });
+  }
+
+  interface IBGRes {
+    sigla: string;
+  }
+  interface IBGResCity {
+    nome: string;
+  }
+
+  interface Ufs {
+    label: string;
+    value: string;
+  }
+
+  interface Cities {
+    label: string;
+    value: string;
+  }
+
+  const [ufs, setUfs] = useState<Ufs[]>([]);
+
+  const [selectedUf, setSelectedUf] = useState("0");
+
+  const [selectedCity, setSelectedCity] = useState("0");
+
+  const [cities, setCities] = useState<Cities[]>([]);
+
+  useEffect(() => {
+    axios
+      .get<IBGRes[]>(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados`
+      )
+      .then((res) => {
+        const ufInitials = res.data.map((uf) => {
+          return { label: uf.sigla, value: uf.sigla };
+        });
+
+        setUfs(ufInitials);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (selectedUf === "0") {
+      return;
+    }
+
+    axios
+      .get<IBGResCity[]>(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`
+      )
+      .then((res) => {
+        const cityName = res.data.map((city) => {
+          return { label: city.nome, value: city.nome };
+        });
+
+        setCities(cityName);
+      });
+  }, [selectedUf]);
+
+  function handleUf(e: string) {
+    setSelectedUf(e);
+  }
+  function handleCity(e: string) {
+    setSelectedCity(e);
   }
 
   return (
-    <ImageBackground
-      source={require("../../assets/home-background.png")}
-      imageStyle={{ width: 274, height: 368 }}
-      style={styles.container}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={styles.main}>
-        <Image source={require("../../assets/logo.png")} />
-        <Text style={styles.title}>Your waste collection marketplace!</Text>
-        <Text style={styles.description}>
-          We help people to find collection points efficiently
-        </Text>
-      </View>
-
-      <View style={styles.footer}>
-        <RectButton style={styles.button} onPress={handleNavigate}>
-          <View style={styles.buttonIcon}>
-            <Icon name="arrow-right" color="#fff" size={24} />
+      <ImageBackground
+        source={require("../../assets/home-background.png")}
+        imageStyle={{ width: 274, height: 368 }}
+        style={styles.container}
+      >
+        <View style={styles.main}>
+          <Image source={require("../../assets/logo.png")} />
+          <View>
+            <Text style={styles.title}>Your waste collection marketplace!</Text>
+            <Text style={styles.description}>
+              We help people to find collection points efficiently
+            </Text>
           </View>
-          <Text style={styles.buttonText}>Enter</Text>
-        </RectButton>
-      </View>
-    </ImageBackground>
+          <View style={styles.select}>
+            <RNPickerSelect
+              placeholder={{ label: "Select an UF" }}
+              onValueChange={handleUf}
+              items={ufs}
+            />
+            <RNPickerSelect
+              placeholder={{ label: "Select a City" }}
+              onValueChange={handleCity}
+              items={cities}
+            />
+          </View>
+        </View>
+
+        <View style={styles.footer}>
+          <RectButton style={styles.button} onPress={handleNavigate}>
+            <View style={styles.buttonIcon}>
+              <Icon name="arrow-right" color="#fff" size={24} />
+            </View>
+            <Text style={styles.buttonText}>Enter</Text>
+          </RectButton>
+        </View>
+      </ImageBackground>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -69,7 +162,9 @@ const styles = StyleSheet.create({
 
   footer: {},
 
-  select: {},
+  select: {
+    marginTop: 32,
+  },
 
   input: {
     height: 60,
